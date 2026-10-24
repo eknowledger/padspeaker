@@ -15,7 +15,7 @@ It shows up as an audio output, picked like any other. Nothing to install on the
 
 [![tests](https://github.com/eknowledger/padspeaker/actions/workflows/tests.yml/badge.svg)](https://github.com/eknowledger/padspeaker/actions/workflows/tests.yml) [![build](https://github.com/eknowledger/padspeaker/actions/workflows/build.yml/badge.svg)](https://github.com/eknowledger/padspeaker/actions/workflows/build.yml) [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-[![python](https://img.shields.io/badge/python-3.9%2B-informational)](docs/LINUX.md) [![dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](pyproject.toml) [![verified on](https://img.shields.io/badge/verified%20on-Batocera%20v41-orange)](COMPATIBILITY.md) [![status: alpha](https://img.shields.io/badge/status-alpha-yellow)](COMPATIBILITY.md)
+[![PyPI](https://img.shields.io/pypi/v/padspeaker)](https://pypi.org/project/padspeaker/) [![python](https://img.shields.io/badge/python-3.9%2B-informational)](docs/LINUX.md) [![dependencies](https://img.shields.io/badge/runtime%20dependencies-0-brightgreen)](pyproject.toml) [![verified on](https://img.shields.io/badge/verified%20on-Batocera%20v41-orange)](COMPATIBILITY.md) [![status: alpha](https://img.shields.io/badge/status-alpha-yellow)](COMPATIBILITY.md)
 
 </div>
 
@@ -145,7 +145,7 @@ python3 -m padspeaker tone         # play a test tone on the pad (saves and rest
 python3 -m padspeaker run          # run the daemon in the foreground; Ctrl-C stops it
 ```
 
-Or install the command: `pip install .` gives you `padspeaker` with the same sub-commands. While `run` is active,
+Or install the command: `pip install padspeaker` (or `pip install .` from a checkout) gives you `padspeaker` with the same sub-commands. While `run` is active,
 select the `Controller speaker (...)` output in your desktop's sound settings, or from a shell:
 
 ```sh

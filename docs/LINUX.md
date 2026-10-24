@@ -44,6 +44,13 @@ python3 -m padspeaker check
 python3 -m padspeaker run
 ```
 
+**With pip, from PyPI:**
+
+```sh
+pip install padspeaker    # or: pipx install padspeaker, or pip install --user padspeaker
+padspeaker --version
+```
+
 **With pip, from the checkout:**
 
 ```sh
@@ -61,7 +68,7 @@ pip install dist/padspeaker-*.whl
 
 The package has no dependencies, so it installs without network access once you have the wheel. Distributions that
 mark the system Python as externally managed need a virtual environment (`python3 -m venv ~/.venvs/padspeaker &&
-~/.venvs/padspeaker/bin/pip install .`) or `pipx install .`; the paths in the unit files below then change.
+~/.venvs/padspeaker/bin/pip install padspeaker`) or `pipx install padspeaker`; the paths in the unit files below then change.
 
 To remove it: `pip uninstall padspeaker` and delete the unit files and the udev rule you added.
 

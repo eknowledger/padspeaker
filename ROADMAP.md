@@ -10,7 +10,6 @@ below needs hardware that a unit test cannot stand in for.
   v41 and nothing else. A genuine Sony pad, a second distro, PulseAudio without PipeWire: each one verified
   turns a "should work" into a row. This is the most useful contribution and needs no code (use the
   "Bug report / pad report" issue template, which also takes "it works").
-- **A published package.** `pip install padspeaker` once there is a second tested system.
 
 ## Maybe
 
