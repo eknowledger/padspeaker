@@ -1,0 +1,72 @@
+# Fast feedback: the whole pytest suite on both ends of the supported Python range and the one
+# Batocera ships. Hardware is never needed: pads, sysfs, pactl and parec are all faked.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # 3.9 is the floor `requires-python` claims, 3.11 is what Batocera v41 runs (the only verified target),
+  # 3.13 is the newest. One version inside a range is one point, not a range. When `requires-python`
+  # moves, move the first entry with it.
+  test:
+    name: unit tests (python ${{ matrix.python }})
+    runs-on: ubuntu-latest
+    strategy:
+      # Off: "fails on 3.9" and "fails on 3.13" are different findings, and cancelling one leg to report
+      # the other hides which.
+      fail-fast: false
+      matrix:
+        python: ["3.9", "3.11", "3.13"]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+
+      - name: libsbc
+        # The runtime loads libsbc with ctypes. Without it the SBC encoder tests skip, and a skipped
+        # encoder test is the one thing this job must not silently do: the 112-byte frame and its header
+        # are what the pad rejects the audio for when they are wrong.
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libsbc1
+
+      # ⚠️ The package is deliberately not installed here: the tests import it from the checkout, and an
+      # editable install would leave a padspeaker.egg-info in the tree, which test_gitignore_and_packaging_hygiene
+      # rejects. Installing the built wheel is checked by build.yml.
+      - run: python -m pip install -r requirements-dev.txt
+
+      - name: Tests
+        run: python -m pytest -q -rs
+
+      - name: The encoder tests ran
+        # ⚠️ -rs above prints skip reasons; this step fails the job if the SBC tests were skipped anyway.
+        run: python -m pytest tests/test_sbc.py -q -p no:cacheprovider --strict-markers -rs | tee /tmp/sbc.txt; ! grep -qi "skipped" /tmp/sbc.txt
+
+  # ⚠️ This job exists for branch protection, and its name must not change. Same shape as `required`
+  # in the sibling projects: one unmatrixed job that waits on the legs and asserts their result, so adding
+  # a Python version needs no change to repository settings.
+  required:
+    name: unit tests
+    needs: test
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Fail unless every Python version passed
+        # `needs` alone does not do this: with `if: always()` this job runs even when a leg failed or was
+        # cancelled, so the result has to be asserted rather than assumed.
+        run: |
+          echo "test: ${{ needs.test.result }}"
+          test "${{ needs.test.result }}" = "success" || exit 1

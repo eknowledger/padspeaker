@@ -1,0 +1,29 @@
+# padspeaker as a systemd USER service (example, not tested on every distribution).
+#
+# The easiest way on a desktop: it runs in your own session, so it finds your PipeWire or PulseAudio by itself
+# (XDG_RUNTIME_DIR is already set) and needs no root.
+#
+# Install:
+#   1. pip install --user .                (puts padspeaker in ~/.local/bin; adjust ExecStart if elsewhere)
+#   2. mkdir -p ~/.config/systemd/user && cp deploy/systemd/user/padspeaker.service ~/.config/systemd/user/
+#   3. make sure you can write to the pad's hidraw node: deploy/udev/70-padspeaker.rules
+#   4. systemctl --user daemon-reload && systemctl --user enable --now padspeaker
+# Look at it:  journalctl --user -u padspeaker -f      and      padspeaker status
+# To keep it running without being logged in:  sudo loginctl enable-linger $USER
+
+[Unit]
+Description=padspeaker: play audio on DualShock 4 speakers over Bluetooth
+After=pipewire-pulse.service pulseaudio.service
+Wants=pipewire-pulse.service
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/padspeaker run
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=default.target

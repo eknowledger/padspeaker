@@ -1,0 +1,46 @@
+# Packaging and the installer script. Split from tests.yml so each gets its own badge and they run in
+# parallel.
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: wheel and sdist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - run: python -m pip install build twine
+      - run: python -m build
+      - run: python -m twine check dist/*
+      - name: Install the wheel in a clean environment and run the command
+        # Catches a package that works from the checkout but not once installed: a missing module in
+        # `packages`, a data file left out of MANIFEST.in.
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install dist/*.whl
+          /tmp/clean/bin/padspeaker --help
+
+  installer:
+    name: installer script
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - name: shellcheck
+        # Preinstalled on the runner. The installer runs as root on someone's gaming machine, so it
+        # gets the strictest reading available.
+        run: shellcheck deploy/install.sh

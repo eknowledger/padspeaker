@@ -1,0 +1,18 @@
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+dist/
+build/
+.DS_Store
+.coverage
+htmlcov/
+.idea/
+.vscode/
+*.swp
+*.log
+*.log.*
+# a local settings file for trying things out in a checkout
+/config.json

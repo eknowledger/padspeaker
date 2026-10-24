@@ -1,0 +1,31 @@
+# Weekly updates for GitHub Actions and the dev requirements.
+#
+# Workflows pin actions by commit SHA with the version in a comment. Dependabot keeps the SHA and the
+# comment in step. Patch and minor updates share one pull request per ecosystem; majors stay separate
+# so they get read.
+#
+# ⚠️ Both ecosystems cap open pull requests. A queue nobody reads is the same as no updates at all, and
+# this file exists to be read.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      actions-patch-and-minor:
+        update-types:
+          - "patch"
+          - "minor"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 3
+    groups:
+      pip-patch-and-minor:
+        update-types:
+          - "patch"
+          - "minor"

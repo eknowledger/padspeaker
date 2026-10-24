@@ -1,0 +1,177 @@
+#!/bin/sh
+# Batocera user service for padspeaker (installed as /userdata/system/services/padspeaker).
+#
+#   padspeaker start|stop|restart|status
+#
+# Batocera calls this at boot (when the service is enabled: `batocera-services enable padspeaker`, or
+# System Settings > Services) and through `batocera-services start|stop|restart|status padspeaker`. It is plain
+# POSIX sh because batocera-services runs it with `bash script start` while boot runs it directly (dash).
+#
+# start   idempotent: does nothing when the daemon already runs. Starts `python3 -m padspeaker run --log-file LOG` in
+#         the background, writes the pid file, rotates the log first (> 1 MB: .log -> .log.1 -> .log.2 -> .log.3; the
+#         daemon rotates it too while it runs) and checks the daemon is still alive two seconds later (otherwise it
+#         prints the end of the log and of the console file and fails). The daemon's own console output (a Python
+#         traceback before logging is set up, and a copy of the log lines) goes to LOG.console, which is truncated at
+#         every start so it cannot grow without bound.
+# stop    SIGTERM (the daemon removes its sinks and restores the lightbar), SIGKILL after 10 s. Only ever signals a
+#         process whose command line mentions padspeaker, so a stale pid file can never kill something else.
+# status  prints "started" or "stopped"; exit status 0 when running, 3 when not.
+#
+# Environment overrides (used by the tests; the defaults are what Batocera needs):
+#   PADSPEAKER_HOME PADSPEAKER_LOG PADSPEAKER_PIDFILE PADSPEAKER_CONFIG PADSPEAKER_PYTHON PADSPEAKER_START_TICKS PADSPEAKER_STOP_TICKS   (a tick is a quarter second)
+#
+# The audio server (PipeWire with pipewire-pulse) keeps its socket under /var/run on Batocera, which is what Batocera's
+# own scripts export as XDG_RUNTIME_DIR; the daemon needs the same to reach pactl and parec.
+
+NAME=padspeaker
+APP=${PADSPEAKER_HOME:-/userdata/system/padspeaker}
+LOG=${PADSPEAKER_LOG:-/userdata/system/logs/padspeaker.log}
+CONSOLE=$LOG.console
+PIDFILE=${PADSPEAKER_PIDFILE:-/var/run/padspeaker.pid}
+CONFIG=${PADSPEAKER_CONFIG:-$APP/config.json}
+RUNTIME_DIR=/var/run
+START_TICKS=${PADSPEAKER_START_TICKS:-8}
+STOP_TICKS=${PADSPEAKER_STOP_TICKS:-40}
+LOG_MAX_BYTES=1000000
+
+if [ -n "${PADSPEAKER_PYTHON:-}" ]; then
+    PY=$PADSPEAKER_PYTHON
+else
+    PY=$(command -v python3 2>/dev/null || true)
+    [ -n "$PY" ] || PY=/usr/bin/python3
+fi
+
+read_pid() {
+    pid=$(cat "$PIDFILE" 2>/dev/null || true)
+    case $pid in
+        ''|*[!0-9]*) pid="" ;;
+    esac
+}
+
+# is_ours <pid>: alive, and its command line is ours (not a recycled pid, not a zombie)
+is_ours() {
+    [ -n "$1" ] || return 1
+    kill -0 "$1" 2>/dev/null || return 1
+    if [ -r "/proc/$1/cmdline" ]; then
+        args=$(tr '\0' ' ' < "/proc/$1/cmdline" 2>/dev/null || true)
+    else
+        args=$(ps -p "$1" -o args= 2>/dev/null || true)
+    fi
+    case $args in
+        *padspeaker*) return 0 ;;   # the daemon, or this script's own subshell just before it execs python
+    esac
+    return 1
+}
+
+# running: sets $pid and succeeds when the daemon is up
+running() {
+    read_pid
+    is_ours "$pid"
+}
+
+rotate_log() {
+    [ -f "$LOG" ] || return 0
+    size=$(wc -c < "$LOG" 2>/dev/null | tr -d ' ')
+    case $size in
+        ''|*[!0-9]*) return 0 ;;
+    esac
+    [ "$size" -gt "$LOG_MAX_BYTES" ] || return 0
+    rm -f "$LOG.3"
+    [ ! -e "$LOG.2" ] || mv "$LOG.2" "$LOG.3"
+    [ ! -e "$LOG.1" ] || mv "$LOG.1" "$LOG.2"
+    mv "$LOG" "$LOG.1"
+}
+
+start() {
+    if running; then
+        echo "$NAME: already running (pid $pid)"
+        return 0
+    fi
+    rm -f "$PIDFILE"
+    if [ ! -d "$APP/padspeaker" ]; then
+        echo "ERROR: $NAME is not installed in $APP (run deploy/install.sh from your computer)" >&2
+        return 1
+    fi
+    echo "Starting padspeaker: "
+    mkdir -p "$(dirname "$LOG")" "$(dirname "$PIDFILE")" || return 1
+    rotate_log
+    echo "$(date '+%Y-%m-%d %H:%M:%S') service: starting padspeaker" >> "$LOG" 2>/dev/null || true
+    set -- -m padspeaker run --log-file "$LOG"
+    if [ -f "$CONFIG" ]; then
+        set -- "$@" --config "$CONFIG"
+    fi
+    (
+        cd "$APP" || exit 1
+        trap '' HUP
+        export XDG_RUNTIME_DIR="$RUNTIME_DIR" PYTHONPATH="$APP${PYTHONPATH:+:$PYTHONPATH}" PYTHONDONTWRITEBYTECODE=1
+        exec "$PY" "$@"
+    ) </dev/null >"$CONSOLE" 2>&1 &
+    pid=$!
+    echo "$pid" > "$PIDFILE"
+    # fail fast when the daemon dies at once (import error, bad config ...)
+    i=0
+    while [ "$i" -lt "$START_TICKS" ]; do
+        sleep 0.25
+        if ! is_ours "$pid"; then
+            rm -f "$PIDFILE"
+            echo "ERROR: $NAME did not stay up; the end of $CONSOLE and of $LOG:" >&2
+            tail -n 15 "$CONSOLE" >&2 2>/dev/null || true
+            tail -n 5 "$LOG" >&2 2>/dev/null || true
+            return 1
+        fi
+        i=$((i + 1))
+    done
+    echo "done (pid $pid, log $LOG)"
+    return 0
+}
+
+stop() {
+    echo "Stopping padspeaker: "
+    read_pid
+    if is_ours "$pid"; then
+        kill -TERM "$pid" 2>/dev/null || true
+        i=0
+        while [ "$i" -lt "$STOP_TICKS" ] && is_ours "$pid"; do
+            sleep 0.25
+            i=$((i + 1))
+        done
+        if is_ours "$pid"; then
+            echo "$NAME did not stop in time; killing it"
+            pkill -KILL -P "$pid" 2>/dev/null || true
+            kill -KILL "$pid" 2>/dev/null || true
+            sleep 0.25
+        fi
+    fi
+    rm -f "$PIDFILE"
+    echo "done"
+    return 0
+}
+
+status() {
+    if running; then
+        echo "started"
+        return 0
+    fi
+    echo "stopped"
+    return 3
+}
+
+case "${1:-}" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}" >&2
+        exit 1
+        ;;
+esac

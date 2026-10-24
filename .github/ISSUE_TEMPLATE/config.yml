@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question, or an idea you want to talk through first
+    url: https://github.com/eknowledger/padspeaker/discussions
+    about: Discussions, not issues. An issue should be something to do; a question is not yet that.
+  - name: Security vulnerability
+    url: https://github.com/eknowledger/padspeaker/security/advisories/new
+    about: Report privately. Read SECURITY.md first, it lists everything the program writes to the pad and the system.
+  - name: Will it work with my pad?
+    url: https://github.com/eknowledger/padspeaker/blob/main/COMPATIBILITY.md
+    about: The compatibility table lists what has been verified on real hardware, what is only covered by tests, and what is not supported.

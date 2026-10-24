@@ -1,0 +1,38 @@
+# padspeaker as a SYSTEM service (example, not tested on every distribution).
+#
+# Use this when the machine is a dedicated box (a media PC, a kiosk) whose PipeWire or PulseAudio runs for one
+# fixed user. On a normal desktop prefer the user unit, deploy/systemd/user/padspeaker.service.
+#
+# Install:
+#   1. pip install .                       (puts padspeaker in /usr/local/bin; adjust ExecStart if elsewhere)
+#   2. sudo cp deploy/systemd/padspeaker.service /etc/systemd/system/
+#   3. edit User= and XDG_RUNTIME_DIR= below for the user whose audio session you want to play to
+#   4. give that user write access to the pad's hidraw node: deploy/udev/70-padspeaker.rules
+#   5. sudo loginctl enable-linger <user>    (so the user's PipeWire runs without a login)
+#   6. sudo systemctl daemon-reload && sudo systemctl enable --now padspeaker
+# Look at it:  journalctl -u padspeaker -f      and      padspeaker status
+#
+# The daemon needs the audio socket of that user, which lives in /run/user/<uid> (find the number with: id -u <user>).
+# systemd's %U does not help here: in a system unit it is the manager's uid (0), not the User= of the service.
+
+[Unit]
+Description=padspeaker: play audio on DualShock 4 speakers over Bluetooth
+After=bluetooth.target sound.target
+Wants=bluetooth.target
+
+[Service]
+Type=simple
+# EDIT: the user that owns the audio session (it must be in the group given access by the udev rule) ...
+User=media
+# EDIT: ... and its numeric id (1000 is only the usual first user).
+Environment=XDG_RUNTIME_DIR=/run/user/1000
+ExecStart=/usr/local/bin/padspeaker run
+Restart=on-failure
+RestartSec=5
+# SIGTERM lets the daemon remove its outputs and restore the pads' lights.
+TimeoutStopSec=15
+NoNewPrivileges=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

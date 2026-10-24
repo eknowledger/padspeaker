@@ -1,0 +1,90 @@
+name: Bug report / pad report
+description: Something does not work, or you tried a pad and want to tell us how it went (works or not).
+labels: ["needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks. Please fill in as much as you can; the commands are read-only except `tone`, which plays a sound on the pad.
+        See COMPATIBILITY.md ("Report your pad") for the same steps. **Hide your Bluetooth addresses**: replace the last three
+        bytes with `xx` (`aa:bb:cc:xx:xx:xx`). Do not paste host names or user names.
+  - type: dropdown
+    id: result
+    attributes:
+      label: How did it go?
+      options:
+        - It works
+        - It works with problems (describe below)
+        - It does not work
+        - The pad is not recognised
+        - Something else (describe below)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: padspeaker version
+      description: Output of `padspeaker --version`
+    validations:
+      required: true
+  - type: input
+    id: system
+    attributes:
+      label: System
+      description: Distribution (or Batocera version), `uname -r`, desktop if any
+      placeholder: "Batocera v41, kernel 6.11"
+    validations:
+      required: true
+  - type: input
+    id: audio
+    attributes:
+      label: Audio server and Bluetooth stack
+      description: "`pactl info | grep 'Server Name'`, `bluetoothctl --version`, and whether `hcitool` is installed"
+      placeholder: "PulseAudio (on PipeWire 1.2.x), BlueZ 5.7x, hcitool present"
+    validations:
+      required: true
+  - type: input
+    id: pad
+    attributes:
+      label: The pad
+      description: Make and model, genuine Sony or clone, and the Bluetooth `VVVV:PPPP` id if you know it
+      placeholder: "clone sold as DualShock 4, 054C:09CC"
+    validations:
+      required: true
+  - type: textarea
+    id: list
+    attributes:
+      label: "`padspeaker list --json`"
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: check
+    attributes:
+      label: "`padspeaker check`"
+      description: Includes the list of Bluetooth gamepads that were not recognised, if any.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: tone
+    attributes:
+      label: "`padspeaker tone --seconds 3`: what did you hear?"
+      description: Nothing, a clear tone, crackling, the tone stopped, the pad disconnected, the light went off. Paste any error.
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: Steps to reproduce if there is a problem.
+    validations:
+      required: false
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: "The last 50 lines of the daemon log (journal, or `/userdata/system/logs/padspeaker.log` on Batocera) and `padspeaker status`."
+      render: text
+    validations:
+      required: false

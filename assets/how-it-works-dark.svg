@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 220" width="960" height="220" role="img"
+     aria-label="Sound from any app goes to a virtual Controller speaker output, padspeaker captures it, encodes it as SBC and sends it to the pad in 16 millisecond Bluetooth reports.">
+  <title>How padspeaker works</title>
+  <style>
+    .box { fill: #161b22; stroke: #aab2c0; stroke-width: 1.6; }
+    .hot { fill: #0f2f2d; stroke: #4fd1c5; stroke-width: 2; }
+    .t   { font: 600 15px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #e8eaf0; }
+    .s   { font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; fill: #aab2c0; }
+    .a   { stroke: #aab2c0; stroke-width: 1.8; fill: none; marker-end: url(#h); }
+    .h   { fill: #e8eaf0; }
+  </style>
+  <defs>
+    <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0l10 5-10 5z" class="h"/>
+    </marker>
+  </defs>
+
+  <rect class="box" x="8" y="50" width="150" height="86" rx="10"/>
+  <text class="t" x="83" y="86" text-anchor="middle">Any app</text>
+  <text class="s" x="83" y="108" text-anchor="middle">game, emulator, music</text>
+
+  <path class="a" d="M162 93H202"/>
+
+  <rect class="box" x="206" y="50" width="176" height="86" rx="10"/>
+  <text class="t" x="294" y="80" text-anchor="middle">Controller speaker</text>
+  <text class="s" x="294" y="101" text-anchor="middle">a virtual audio output,</text>
+  <text class="s" x="294" y="119" text-anchor="middle">picked like any other</text>
+
+  <path class="a" d="M386 93H426"/>
+
+  <rect class="hot" x="430" y="30" width="206" height="126" rx="10"/>
+  <text class="t" x="533" y="60" text-anchor="middle">padspeaker</text>
+  <text class="s" x="533" y="84" text-anchor="middle">1  records that output</text>
+  <text class="s" x="533" y="104" text-anchor="middle">2  encodes it as SBC</text>
+  <text class="s" x="533" y="124" text-anchor="middle">3  sends a report every 16 ms</text>
+  <text class="s" x="533" y="144" text-anchor="middle">4  keeps the light colour</text>
+
+  <path class="a" d="M640 93H680"/>
+
+  <rect class="box" x="684" y="50" width="130" height="86" rx="10"/>
+  <text class="t" x="749" y="86" text-anchor="middle">Bluetooth</text>
+  <text class="s" x="749" y="108" text-anchor="middle">HID link</text>
+
+  <path class="a" d="M818 93H858"/>
+
+  <rect class="box" x="862" y="50" width="90" height="86" rx="10"/>
+  <text class="t" x="907" y="86" text-anchor="middle">Pad</text>
+  <text class="s" x="907" y="108" text-anchor="middle">speaker</text>
+
+  <text class="s" x="480" y="198" text-anchor="middle">Buttons, sticks and motion are never touched. Choosing another output stops the stream and restores the light.</text>
+</svg>

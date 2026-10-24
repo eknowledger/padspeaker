@@ -1,0 +1,20 @@
+# Give a NON-ROOT group write access to the Bluetooth hidraw nodes of Sony pads (example; UNTESTED).
+#
+# padspeaker writes audio to /dev/hidrawN. Those nodes are root-only by default. KERNELS matches the HID device
+# that is the parent of the hidraw node; its name starts with the bus (0005 = Bluetooth), the Sony vendor id 054C and
+# the product id (for example 0005:054C:09CC.0003). USB pads (bus 0003) do not match.
+#
+# Install:
+#   sudo groupadd --system padspeaker                 # once
+#   sudo usermod -aG padspeaker <user>                # then log out and in; for the system service use that user
+#   sudo cp deploy/udev/70-padspeaker.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload && sudo udevadm trigger --subsystem-match=hidraw
+#   (disconnect and reconnect the pad; check with: ls -l /dev/hidraw*)
+#
+# Pads whose Bluetooth ids are not Sony's (clones added with extra_pad_ids) need a line of their own: replace
+# 054C:* with the vendor id in capitals followed by :* (for example 0005:1234:*).
+SUBSYSTEM=="hidraw", KERNELS=="0005:054C:*", GROUP="padspeaker", MODE="0660"
+
+# Alternative for a desktop: give the logged-in user on the active seat access, without any group.
+# (Use this instead of the line above, not together with it.)
+#SUBSYSTEM=="hidraw", KERNELS=="0005:054C:*", TAG+="uaccess"

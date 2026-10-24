@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "padspeaker"
+dynamic = ["version"]
+description = "Play your Linux machine's sound on the built-in speaker of a Bluetooth DualShock 4 style gamepad"
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{ name = "Ahmed Elmalt" }]
+keywords = ["dualshock", "ds4", "bluetooth", "speaker", "audio", "pipewire", "pulseaudio", "batocera", "sbc"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Natural Language :: English",
+    "Topic :: Games/Entertainment",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: System :: Hardware",
+]
+# No runtime dependencies on purpose: the standard library, libsbc (loaded with ctypes) and the pactl and parec
+# command line tools are all it needs.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/eknowledger/padspeaker"
+Documentation = "https://github.com/eknowledger/padspeaker#readme"
+Issues = "https://github.com/eknowledger/padspeaker/issues"
+Changelog = "https://github.com/eknowledger/padspeaker/blob/main/CHANGELOG.md"
+
+[project.scripts]
+padspeaker = "padspeaker.cli:main"
+
+[tool.setuptools]
+packages = ["padspeaker"]
+
+[tool.setuptools.dynamic]
+version = { attr = "padspeaker.__version__" }
