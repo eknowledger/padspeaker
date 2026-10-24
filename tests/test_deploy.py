@@ -1128,7 +1128,7 @@ def test_printed_uninstall_script_protects_user_data_without_purge(box):
 
 # ---------------------------------------------------------------- packaging and documentation stay consistent with the code
 
-DOC_FILES = ("README.md", "CONTRIBUTING.md", "docs/ARCHITECTURE.md", "docs/PROTOCOL.md", "docs/BATOCERA.md", "docs/LINUX.md", "COMPATIBILITY.md",
+DOC_FILES = ("README.md", "CONTRIBUTING.md", "docs/ARCHITECTURE.md", "docs/RELEASING.md", "docs/PROTOCOL.md", "docs/BATOCERA.md", "docs/LINUX.md", "COMPATIBILITY.md",
              "SECURITY.md", "CHANGELOG.md", ".github/PULL_REQUEST_TEMPLATE.md")
 CREDIT_URLS = (
     "https://sensepost.com/blog/2020/dual-pod-shock-emotional-abuse-of-a-dualshock",

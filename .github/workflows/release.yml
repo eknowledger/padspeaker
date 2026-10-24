@@ -1,0 +1,79 @@
+# Publishes a release to PyPI. Runs when a GitHub release is published, or by hand for a tag that was
+# released before this workflow existed (v0.1.0): Actions, "release", Run workflow, type the tag.
+#
+# No secret is stored anywhere. PyPI trusts this workflow, in the `pypi` environment, through OpenID Connect
+# ("trusted publishing"), and hands it a token that lives for the length of the job. The one-time setup is in
+# docs/RELEASING.md.
+name: release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to publish, for example v0.1.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build and check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          # The tag being released, not whatever main is now. For a release event this is the release's tag.
+          ref: ${{ inputs.tag || github.event.release.tag_name }}
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - run: python -m pip install build twine
+      - run: python -m build
+      - run: python -m twine check dist/*
+
+      - name: The tag, the package version and the built files agree
+        # ⚠️ PyPI never lets a version be uploaded twice, and a yanked version still blocks its number. A
+        # mismatch caught here costs nothing; caught after upload it costs a version number.
+        # The ref goes through env rather than being interpolated into the script, so a tag name cannot
+        # become shell syntax.
+        env:
+          TAG: ${{ inputs.tag || github.event.release.tag_name }}
+        run: |
+          version=$(python -c "import padspeaker; print(padspeaker.__version__)")
+          test "v$version" = "$TAG" || { echo "::error::tag $TAG does not match padspeaker.__version__ $version"; exit 1; }
+          ls dist
+          test -f "dist/padspeaker-$version.tar.gz" && test -f "dist/padspeaker-$version-py3-none-any.whl"
+
+      - name: Install the wheel in a clean environment and run the command
+        run: |
+          python -m venv /tmp/clean
+          /tmp/clean/bin/pip install dist/*.whl
+          /tmp/clean/bin/padspeaker --version
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  publish:
+    name: publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # The environment is where a reviewer can be required, and it is the name PyPI's trusted publisher is
+    # registered against. Renaming it breaks publishing until PyPI is told.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/padspeaker/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333  # v8.0.2
+        with:
+          name: dist
+          path: dist/
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086  # v1.14.3

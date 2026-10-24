@@ -1,8 +1,8 @@
 <div align="center">
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
-  <img src="assets/logo.svg" alt="" width="88" height="88">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/eknowledger/padspeaker/main/assets/logo-dark.svg">
+  <img src="https://raw.githubusercontent.com/eknowledger/padspeaker/main/assets/logo.svg" alt="" width="88" height="88">
 </picture>
 
 # padspeaker
@@ -40,12 +40,12 @@ runtime dependencies beyond the standard library, `libsbc` and the `pactl` and `
 The output appears in the system's own audio menu. This is Batocera's: the pad's speaker, and the TV plus the pad
 together, sit next to the HDMI output.
 
-<img src="assets/audio-output-menu.jpg" alt="Batocera's Audio Output menu with four entries: Auto, HD-Audio Generic Digital Stereo (HDMI 2), Controller speaker, and the TV plus the controller speaker" width="720">
+<img src="https://raw.githubusercontent.com/eknowledger/padspeaker/main/assets/audio-output-menu.jpg" alt="Batocera's Audio Output menu with four entries: Auto, HD-Audio Generic Digital Stereo (HDMI 2), Controller speaker, and the TV plus the controller speaker" width="720">
 
 Then the sound plays from the pad. Thirteen seconds, with sound: a game preview plays on the TV, then the camera moves
 to the pad that is playing it.
 
-[![A short video: the TV plays a game preview and the sound comes out of the gamepad on the table. Click to watch on YouTube.](assets/demo-poster.jpg)](https://youtu.be/9urLV7JDRmo)
+[![A short video: the TV plays a game preview and the sound comes out of the gamepad on the table. Click to watch on YouTube.](https://raw.githubusercontent.com/eknowledger/padspeaker/main/assets/demo-poster.jpg)](https://youtu.be/9urLV7JDRmo)
 
 ## Contents
 
@@ -76,8 +76,8 @@ same Bluetooth link; Linux just has no driver for that. This project sends it.
 ## How it works, in plain words
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="assets/how-it-works-dark.svg">
-  <img src="assets/how-it-works.svg" alt="Sound from any app goes to a virtual Controller speaker output; padspeaker records it, encodes it as SBC and sends it to the pad in 16 millisecond Bluetooth reports.">
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/eknowledger/padspeaker/main/assets/how-it-works-dark.svg">
+  <img src="https://raw.githubusercontent.com/eknowledger/padspeaker/main/assets/how-it-works.svg" alt="Sound from any app goes to a virtual Controller speaker output; padspeaker records it, encodes it as SBC and sends it to the pad in 16 millisecond Bluetooth reports.">
 </picture>
 
 1. A small background program (the daemon) watches for connected pads.
@@ -415,6 +415,7 @@ the protocol builders against; use `padspeaker tone` for a hardware check.
 - [docs/PROTOCOL.md](docs/PROTOCOL.md): the byte-level protocol and how it was verified.
 - [COMPATIBILITY.md](COMPATIBILITY.md): what is verified, what is not, and how to report your pad.
 - [SECURITY.md](SECURITY.md): what the program writes, what runs as root, how to turn features off.
+- [docs/RELEASING.md](docs/RELEASING.md): how a release is cut and published to PyPI.
 - [CHANGELOG.md](CHANGELOG.md)
 - [ROADMAP.md](ROADMAP.md): what might come next, and what is not planned.
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): how it is put together and why; read before changing the code.
