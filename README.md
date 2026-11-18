@@ -413,6 +413,7 @@ the protocol builders against; use `padspeaker tone` for a hardware check.
 - [docs/BATOCERA.md](docs/BATOCERA.md): install, enable, pick the output, uninstall, where files live, what is not modified.
 - [docs/LINUX.md](docs/LINUX.md): any other Linux: requirements, install, running as a service, picking the output, without `hcitool`.
 - [docs/PROTOCOL.md](docs/PROTOCOL.md): the byte-level protocol and how it was verified.
+- [docs/MEASUREMENTS.md](docs/MEASUREMENTS.md): the Bluetooth bitrate ceiling and measured speaker-muting results.
 - [COMPATIBILITY.md](COMPATIBILITY.md): what is verified, what is not, and how to report your pad.
 - [SECURITY.md](SECURITY.md): what the program writes, what runs as root, how to turn features off.
 - [docs/RELEASING.md](docs/RELEASING.md): how a release is cut and published to PyPI.
