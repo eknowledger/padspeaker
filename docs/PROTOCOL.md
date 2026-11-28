@@ -39,6 +39,9 @@ settings, which is why `SbcEncoder.encode()` checks it.
 SBC keeps filter history between frames, so use one encoder per stream and feed it consecutive chunks. ffmpeg's `sbc`
 encoder cannot select dual channel mode, so libsbc is used directly (through `ctypes`).
 
+Frame sizes for other bitpools, the bitrate ceiling implied by the 448-byte frame area, the sample-rate trade-offs
+and the measured speaker-muting results are in [MEASUREMENTS.md](MEASUREMENTS.md).
+
 ## Audio output report `0x17` (462 bytes)
 
 | offset | size | value | meaning |
